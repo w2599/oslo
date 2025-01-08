@@ -1,3 +1,5 @@
 xcuserdata
 *.xcworkspacedata
 xcshareddata
+packages
+.theos

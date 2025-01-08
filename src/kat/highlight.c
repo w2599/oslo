@@ -314,8 +314,8 @@ char *highlight_line(const char *line, char *hl, size_t str_size)
 {
     struct highlighted_line *high_line;
     size_t tok_size;
-    int keyword_start;
-    int keyword_end;
+    uint64_t keyword_start;
+    uint64_t keyword_end;
     
     /* Reset indexes. */
     if (hl != NULL)
@@ -751,7 +751,7 @@ int str2int(int *out, char *s)
     if (*end != '\0')
         return (-1);
     
-    *out = l;
+    *out = (int)l;
     return (0);
 }
 
@@ -836,7 +836,7 @@ int highlight_init(const char *theme_file)
             
             /* Copy to the list. */
             COLORS[CURRENT_THEME+idx] = color;
-            LENGTHS[CURRENT_THEME+idx] = strlen(color);
+            LENGTHS[CURRENT_THEME+idx] = (int)strlen(color);
         }
         
         /* If something goes wrong. */

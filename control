@@ -1,0 +1,9 @@
+Package: com.ethanarbuckle.oslo
+Name: oslo
+Version: 1.0.0
+Architecture: iphoneos-arm
+Description: os_log viewer that supports streaming both real-time logs and archived logs.
+Maintainer: Ethan Arbuckle
+Author: Ethan Arbuckle
+Section: System
+Tag: role::hacker

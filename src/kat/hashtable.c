@@ -488,7 +488,7 @@ static inline uint64_t fmix64(uint64_t k)
  */
 uint64_t hashtable_MurMur3_hash(const void *key, size_t size)
 {
-    const int nblocks = size / 4;
+    const uint64_t nblocks = size / 4;
     
     /* Seeds are nulled for now. */
     uint64_t h1 = 0;

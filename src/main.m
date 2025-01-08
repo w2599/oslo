@@ -40,7 +40,7 @@ static void (^streamEventHandler)(OSLogEventProxy *) = ^void(OSLogEventProxy *lo
 };
 
 static void (^streamInvalidationHandler)(OSLogEventStream *, NSUInteger, id) = ^void(OSLogEventStream *stream, NSUInteger code, id info) {
-    printf("Stream invalidated with code %lu\n", code);
+    printf("Stream invalidated with code %lu\n", (unsigned long)code);
     exit(0);
 };
 

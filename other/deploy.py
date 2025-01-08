@@ -7,19 +7,19 @@ from typing import Optional
 DEVICE_SSH_PORT = "2222"
 DEVICE_SSH_IP = "localhost"
 LOCAL_LDID2_PATH = "/opt/homebrew/bin/ldid2"
-
+JB_ROOT_PREFIX = Path("/var/jb/")
 
 @dataclass
 class BinaryInstallInformation:
     # The on-device path to copy the binary to
-    on_device_path: str
+    on_device_path: Path
     # An entitlements file to sign the local binary with before copying to the device.
     # If no file is specified, the binary will be signed without explicit entitlements
-    entitlements_file: Optional[str] = None
+    entitlements_file: Optional[Path] = None
 
 
 BINARY_DEPLOY_INFO = {
-    "oslo": BinaryInstallInformation("/var/jb/usr/bin/oslo", "entitlements.xml"),
+    "oslo": BinaryInstallInformation(JB_ROOT_PREFIX / "usr/bin/oslo", Path("other/entitlements.plist")),
 }
 
 
@@ -48,8 +48,6 @@ def deploy_to_device(local_path: Path, binary_deploy_info: BinaryInstallInformat
     else:
         ldid_cmd_args.append("-S")
     ldid_cmd_args.append(local_path.as_posix())
-    print(ldid_cmd_args)
-#    print(subprocess.check_output(ldid_cmd_args))
 
     # Delete existing binary on-device if it exists
     try:
@@ -72,13 +70,17 @@ def deploy_to_device(local_path: Path, binary_deploy_info: BinaryInstallInformat
     except Exception as e:
         raise Exception(f"Failed to copy {binary_deploy_info.on_device_path} to device with error: {e}")
     
+    on_device_ents_path = JB_ROOT_PREFIX / "tmp/entitlements.plist"
     try:
-        copy_file_to_device(binary_deploy_info.entitlements_file, "/tmp/entitlements.xml")
+        if binary_deploy_info.entitlements_file and binary_deploy_info.entitlements_file.exists():
+            copy_file_to_device(binary_deploy_info.entitlements_file, on_device_ents_path)
     except Exception as e:
         print(f"Failed to copy entitlements file to device with error: {e}")
-        pass
 
-    run_command_on_device(f"/var/jb/usr/bin/ldid -S/tmp/entitlements.xml {binary_deploy_info.on_device_path}")
+    on_device_ldid_path = JB_ROOT_PREFIX / "usr/bin/ldid"
+    run_command_on_device(
+        f"{on_device_ldid_path.as_posix()} -S{on_device_ents_path.as_posix()} {binary_deploy_info.on_device_path.as_posix()}"
+    )
 
 
 if __name__ == "__main__":
