@@ -32,11 +32,45 @@
 }
 @end
 
+static _OSLogEventCopy *lastEvent = nil;
+static int lastEventRepeatCount = 0;
+// Whether to drop repeated messages (from the same process) or not
+static BOOL dropRepeatedMessages = YES;
+
 static void (^streamEventHandler)(OSLogEventProxy *) = ^void(OSLogEventProxy *logProxyEvent) {
     if (!logProxyEvent) {
         return;
     }
-    printLogEvent([[_OSLogEventCopy alloc] initWithProxyEvent:logProxyEvent]);
+    
+    if (dropRepeatedMessages && lastEvent && lastEvent.processIdentifier == logProxyEvent.processIdentifier) {
+        
+        NSTimeInterval timeDiff = [logProxyEvent.date timeIntervalSinceDate:lastEvent.date];
+        BOOL sameMessage = [lastEvent.composedMessage isEqualToString:logProxyEvent.composedMessage];
+        
+        if (sameMessage && timeDiff <= 1 ) {
+            lastEventRepeatCount++;
+            return;
+        }
+        
+        // Reset the dupe counter if the message is different than the last
+        if (!sameMessage) {
+            if (lastEventRepeatCount > 0) {
+                // Only print repeat count if > 1 and > 1s since last dupe (to avoid spamming this message)
+                if (timeDiff > 1) {
+                    printf("Last message repeated %d times\n", lastEventRepeatCount);
+                }
+                
+                lastEventRepeatCount = 0;
+            }
+        }
+    }
+    
+    _OSLogEventCopy *event = [[_OSLogEventCopy alloc] initWithProxyEvent:logProxyEvent];
+    printLogEvent(event);
+
+    if (dropRepeatedMessages) {
+        lastEvent = event;
+    }
 };
 
 static void (^streamInvalidationHandler)(OSLogEventStream *, NSUInteger, id) = ^void(OSLogEventStream *stream, NSUInteger code, id info) {
