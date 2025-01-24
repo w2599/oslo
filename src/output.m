@@ -123,6 +123,7 @@ void printLogEvent(_OSLogEventCopy *logProxyEvent) {
     NSString *processName = logProxyEvent.processImagePath.lastPathComponent;
     NSString *imageName = logProxyEvent.senderImagePath.lastPathComponent;
     if (!processName || !imageName) {
+        printf("Missing process or image name\n");
         return;
     }
 

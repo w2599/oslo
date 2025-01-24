@@ -1,0 +1,250 @@
+//
+//  config.m
+//  oslo
+//
+//  Created by Ethan Arbuckle on 1/23/25.
+//
+
+#import "config.h"
+#import <getopt.h>
+
+@implementation OSLogFilter
+@end
+
+@implementation OSLogOptions
+- (id)init {
+    if ((self = [super init])) {
+        _live = YES;
+    }
+    return self;
+}
+@end
+
+@implementation OSLogConfig
+
++ (NSDate *)parseTimeOffset:(NSString *)offset {
+    // Negative time offset: -1h, -30m, -1d, -1w
+    if ([offset hasPrefix:@"-"]) {
+        NSString *unit = [offset substringFromIndex:offset.length - 1];
+        NSTimeInterval interval = [[offset substringToIndex:offset.length - 1] doubleValue];
+        if ([unit isEqualToString:@"h"]) {
+            return [NSDate dateWithTimeIntervalSinceNow:interval * 60 * 60];
+        } else if ([unit isEqualToString:@"m"]) {
+            return [NSDate dateWithTimeIntervalSinceNow:interval * 60];
+        } else if ([unit isEqualToString:@"d"]) {
+            return [NSDate dateWithTimeIntervalSinceNow:interval * 60 * 60 * 24];
+        } else if ([unit isEqualToString:@"w"]) {
+            return [NSDate dateWithTimeIntervalSinceNow:interval * 60 * 60 * 24 * 7];
+        }
+    }
+    // Date and time: 2025-01-23 12:34:56
+    else if ([offset componentsSeparatedByString:@"-"].count == 3 && [offset componentsSeparatedByString:@"-"].count == 3) {
+        NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
+        formatter.dateFormat = @"yyyy-MM-dd HH:mm:ss";
+        return [formatter dateFromString:offset];
+    }
+    // Date only: 2025-01-23
+    else if ([offset componentsSeparatedByString:@"-"].count == 3) {
+        NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
+        formatter.dateFormat = @"yyyy-MM-dd";
+        return [formatter dateFromString:offset];
+    }
+    // Time only: 12:34:56
+    else if ([offset componentsSeparatedByString:@":"].count == 2) {
+        NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
+        formatter.dateFormat = @"HH:mm:ss";
+        return [formatter dateFromString:offset];
+    }
+    
+    return nil;
+}
+
++ (instancetype)parseWithArgc:(int)argc argv:(char **)argv {
+    OSLogConfig *config = [[OSLogConfig alloc] init];
+    config.filter = [[OSLogFilter alloc] init];
+    config.options = [[OSLogOptions alloc] init];
+    
+    static struct option long_options[] = {
+        {"level", required_argument, 0, 'L'},
+        {"after", required_argument, 0, 'a'},
+        {"before", required_argument, 0, 'b'},
+        {"contains", required_argument, 0, 'c'},
+        {"exclude", required_argument, 0, 'e'},
+        {"live", no_argument, 0, 'l'},
+        {"stored", no_argument, 0, 's'},
+        {"group", no_argument, 0, 'g'},
+        {"json", no_argument, 0, 'j'},
+        {"file", required_argument, 0, 'f'},
+        {"repeats", no_argument, 0, 'r'},
+        {"help", no_argument, 0, 'h'},
+        {0, 0, 0, 0}
+    };
+    
+    int opt;
+    int option_index = 0;
+    
+    while ((opt = getopt_long(argc, argv, "L:a:b:c:e:lsgjrf:h", long_options, &option_index)) != -1) {
+        switch (opt) {
+            case 'L': {
+                NSString *level = [NSString stringWithUTF8String:optarg];
+                if ([level caseInsensitiveCompare:@"debug"] == NSOrderedSame) {
+                    config.filter.level = OSLogLevelDebug;
+                } else if ([level caseInsensitiveCompare:@"info"] == NSOrderedSame) {
+                    config.filter.level = OSLogLevelInfo;
+                } else if ([level caseInsensitiveCompare:@"warn"] == NSOrderedSame) {
+                    config.filter.level = OSLogLevelWarning;
+                } else if ([level caseInsensitiveCompare:@"error"] == NSOrderedSame) {
+                    config.filter.level = OSLogLevelError;
+                }
+                break;
+            }
+            case 'a': {
+                NSString *after = [NSString stringWithUTF8String:optarg];
+                NSDate *date = [self parseTimeOffset:after];
+                if (!date) {
+                    printf("Invalid time offset: %s\n", after.UTF8String);
+                    exit(1);
+                }
+                config.filter.after = date;
+                break;
+            }
+            case 'b': {
+                NSString *before = [NSString stringWithUTF8String:optarg];
+                NSDate *date = [self parseTimeOffset:before];
+                if (!date) {
+                    printf("Invalid time offset: %s\n", before.UTF8String);
+                    exit(1);
+                }
+                config.filter.before = date;
+                break;
+            }
+            case 'c':
+                config.filter.contains = [NSString stringWithUTF8String:optarg];
+                break;
+            case 'e':
+                config.filter.exclude = [NSString stringWithUTF8String:optarg];
+                break;
+            case 'l':
+                config.options.live = YES;
+                break;
+            case 's':
+                config.options.live = NO;
+                break;
+            case 'g':
+                config.options.group = YES;
+                break;
+            case 'j':
+                config.options.json = YES;
+                break;
+            case 'f':
+                config.options.outputFile = [NSString stringWithUTF8String:optarg];
+                break;
+            case 'r':
+                config.options.dropRepeatedMessages = YES;
+                break;
+            case 'h':
+                [self printUsage];
+                exit(0);
+            default:
+                [self printUsage];
+                exit(1);
+        }
+    }
+    
+    if (optind < argc) {
+        NSString *processArg = [NSString stringWithUTF8String:argv[optind]];
+        if ([processArg rangeOfCharacterFromSet:[NSCharacterSet decimalDigitCharacterSet]].length == processArg.length) {
+            config.filter.pid = [processArg intValue];
+        }
+        else {
+            config.filter.processPattern = [processArg lowercaseString];
+        }
+    }
+    
+    if (config.options.group && config.options.live) {
+        printf("Error: Grouping only works with stored logs\n");
+        exit(1);
+    }
+    
+    return config;
+}
+
++ (void)printUsage {
+    printf("Usage: oslo [process] [filters] [options]\n\n");
+    printf("Process:\n");
+    printf("  <name>         Process name (case insensitive substring match))\n");
+    printf("  <pid>          Process ID\n");
+    printf("                 (shows all processes if omitted)\n\n");
+    printf("Filters:\n");
+    printf("  -L, --level    Log level (debug|info|warn|error)\n");
+    printf("  -a, --after    Time format options:\n");
+    printf("                   Offset: -1h, -30m, -1d, -1w\n");
+    printf("                   Date: 2025-01-23\n");
+    printf("                   Time: 12:34:56\n");
+    printf("                   Both: 2025-01-23 12:34:56\n");
+    printf("  -b, --before   Same time formats as --after\n");
+    printf("  -c, --contains Include messages containing text (case insensitive)\n");
+    printf("  -e, --exclude  Exclude messages containing text (case insensitive)\n\n");
+    printf("Options:\n");
+    printf("  -l, --live     Live logs (default)\n");
+    printf("  -s, --stored   Stored logs\n");
+    printf("  -g, --group    Group by process\n");
+    printf("  -j, --json     JSON output\n");
+    printf("  -f, --file     Write to file\n");
+    printf("  -r, --repeats  Drop repeated messages (default: show all)\n");
+}
+
+- (NSPredicate *)buildPredicate {
+    NSMutableArray *subpredicates = [NSMutableArray array];
+    
+    if (self.filter.processPattern) {
+        [subpredicates addObject:[NSPredicate predicateWithFormat:@"processImagePath CONTAINS[c] %@", self.filter.processPattern]];
+    }
+    
+    if (self.filter.pid) {
+        [subpredicates addObject:[NSPredicate predicateWithFormat:@"processIdentifier == %d", self.filter.pid]];
+    }
+    
+    if (self.filter.contains) {
+        [subpredicates addObject:[NSPredicate predicateWithFormat:@"composedMessage CONTAINS[c] %@", self.filter.contains]];
+    }
+    
+    if (self.filter.exclude) {
+        [subpredicates addObject:[NSPredicate predicateWithFormat:@"NOT composedMessage CONTAINS[c] %@", self.filter.exclude]];
+    }
+    
+    if (self.filter.after) {
+        [subpredicates addObject:[NSPredicate predicateWithFormat:@"date >= %@", self.filter.after]];
+    }
+    
+    if (self.filter.before) {
+        [subpredicates addObject:[NSPredicate predicateWithFormat:@"date <= %@", self.filter.before]];
+    }
+    
+    switch (self.filter.level) {
+        case OSLogLevelError:
+            [subpredicates addObject:[NSPredicate predicateWithFormat:@"logType == 16"]];
+            break;
+        case OSLogLevelWarning:
+            [subpredicates addObject:[NSPredicate predicateWithFormat:@"logType == 3"]];
+            break;
+        case OSLogLevelInfo:
+            [subpredicates addObject:[NSPredicate predicateWithFormat:@"logType == 2"]];
+            break;
+        case OSLogLevelDebug:
+            [subpredicates addObject:[NSPredicate predicateWithFormat:@"logType == 1"]];
+            break;
+        default:
+            break;
+    }
+    
+    if (subpredicates.count == 0) {
+        return [NSPredicate predicateWithValue:YES];
+    } else if (subpredicates.count == 1) {
+        return subpredicates.firstObject;
+    } else {
+        return [NSCompoundPredicate andPredicateWithSubpredicates:subpredicates];
+    }
+}
+
+@end

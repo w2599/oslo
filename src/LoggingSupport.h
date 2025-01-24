@@ -27,7 +27,7 @@
 - (id)initWithLiveSource:(id)source;
 - (void)setFilterPredicate:(NSPredicate *)predicate;
 - (void)setEventHandler:(void (^)(OSLogEventProxy *))handler;
-- (void)setInvalidationHandler:(void (^)(OSLogEventStream *, NSUInteger code, id info))handler;
+- (void)setInvalidationHandler:(void (^)(void))handler;
 - (void)invalidate;
 - (void)setFlags:(NSUInteger)flags;
 - (void)activateStreamFromDate:(NSDate *)date;
