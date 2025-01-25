@@ -8,10 +8,11 @@
 #import <Foundation/Foundation.h>
 
 typedef NS_ENUM(NSInteger, OSLogLevel) {
-    OSLogLevelDebug,
-    OSLogLevelInfo,
-    OSLogLevelWarning,
-    OSLogLevelError
+    OSLogLevelNotice = 0x00,
+    OSLogLevelInfo = 0x01,
+    OSLogLevelDebug = 0x02,
+    OSLogLevelError = 0x10,
+    OSLogLevelFault = 0x11
 };
 
 @interface OSLogFilter : NSObject

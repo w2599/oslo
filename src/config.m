@@ -62,6 +62,7 @@
 + (instancetype)parseWithArgc:(int)argc argv:(char **)argv {
     OSLogConfig *config = [[OSLogConfig alloc] init];
     config.filter = [[OSLogFilter alloc] init];
+    config.filter.level = OSLogLevelNotice;
     config.options = [[OSLogOptions alloc] init];
     
     static struct option long_options[] = {
@@ -87,14 +88,24 @@
         switch (opt) {
             case 'L': {
                 NSString *level = [NSString stringWithUTF8String:optarg];
-                if ([level caseInsensitiveCompare:@"debug"] == NSOrderedSame) {
+                if ([level caseInsensitiveCompare:@"notice"] == NSOrderedSame) {
+                    config.filter.level = OSLogLevelNotice;
+                }
+                else if ([level caseInsensitiveCompare:@"debug"] == NSOrderedSame) {
                     config.filter.level = OSLogLevelDebug;
-                } else if ([level caseInsensitiveCompare:@"info"] == NSOrderedSame) {
+                }
+                else if ([level caseInsensitiveCompare:@"info"] == NSOrderedSame) {
                     config.filter.level = OSLogLevelInfo;
-                } else if ([level caseInsensitiveCompare:@"warn"] == NSOrderedSame) {
-                    config.filter.level = OSLogLevelWarning;
-                } else if ([level caseInsensitiveCompare:@"error"] == NSOrderedSame) {
+                }
+                else if ([level caseInsensitiveCompare:@"error"] == NSOrderedSame) {
                     config.filter.level = OSLogLevelError;
+                }
+                else if ([level caseInsensitiveCompare:@"fault"] == NSOrderedSame) {
+                    config.filter.level = OSLogLevelFault;
+                }
+                else {
+                    printf("Invalid log level: %s\n", level.UTF8String);
+                    exit(1);
                 }
                 break;
             }
@@ -176,7 +187,7 @@
     printf("  <pid>          Process ID\n");
     printf("                 (shows all processes if omitted)\n\n");
     printf("Filters:\n");
-    printf("  -L, --level    Log level (debug|info|warn|error)\n");
+    printf("  -L, --level    Log level (notice, debug, info, error, fault)\n");
     printf("  -a, --after    Time format options:\n");
     printf("                   Offset: -1h, -30m, -1d, -1w\n");
     printf("                   Date: 2025-01-23\n");
@@ -211,6 +222,8 @@
     
     if (self.filter.exclude) {
         [subpredicates addObject:[NSPredicate predicateWithFormat:@"NOT composedMessage CONTAINS[c] %@", self.filter.exclude]];
+        [subpredicates addObject:[NSPredicate predicateWithFormat:@"NOT senderImagePath CONTAINS[c] %@", self.filter.exclude]];
+        [subpredicates addObject:[NSPredicate predicateWithFormat:@"NOT subsystem CONTAINS[c] %@", self.filter.exclude]];
     }
     
     if (self.filter.after) {
@@ -221,21 +234,8 @@
         [subpredicates addObject:[NSPredicate predicateWithFormat:@"date <= %@", self.filter.before]];
     }
     
-    switch (self.filter.level) {
-        case OSLogLevelError:
-            [subpredicates addObject:[NSPredicate predicateWithFormat:@"logType == 16"]];
-            break;
-        case OSLogLevelWarning:
-            [subpredicates addObject:[NSPredicate predicateWithFormat:@"logType == 3"]];
-            break;
-        case OSLogLevelInfo:
-            [subpredicates addObject:[NSPredicate predicateWithFormat:@"logType == 2"]];
-            break;
-        case OSLogLevelDebug:
-            [subpredicates addObject:[NSPredicate predicateWithFormat:@"logType == 1"]];
-            break;
-        default:
-            break;
+    if (self.filter.level) {
+        [subpredicates addObject:[NSPredicate predicateWithFormat:@"logType == %d", self.filter.level]];
     }
     
     if (subpredicates.count == 0) {
