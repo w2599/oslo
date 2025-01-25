@@ -158,6 +158,9 @@
     if (self.outputFile) {
         [self.outputFile writeData:[text dataUsingEncoding:NSUTF8StringEncoding]];
     }
+    else {
+        printf("%s", [text UTF8String]);
+    }
 }
 
 @end
