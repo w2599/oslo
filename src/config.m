@@ -162,6 +162,15 @@
         }
     }
     
+    if ((config.filter.after && config.filter.before) && ([config.filter.after compare:config.filter.before] == NSOrderedDescending)) {
+        printf("Error: --after time is later than --before time\n");
+        exit(1);
+    }
+    
+    if ((config.filter.after || config.filter.before) && config.options.live) {
+        printf("Applying time filters to live logs. If you want to search older logs, use -s / --stored\n");
+    }
+    
     if (optind < argc) {
         NSString *processArg = [NSString stringWithUTF8String:argv[optind]];
         if ([processArg rangeOfCharacterFromSet:[NSCharacterSet decimalDigitCharacterSet]].length == processArg.length) {
@@ -208,22 +217,43 @@
 - (NSPredicate *)buildPredicate {
     NSMutableArray *subpredicates = [NSMutableArray array];
     
-    if (self.filter.processPattern) {
-        [subpredicates addObject:[NSPredicate predicateWithFormat:@"processImagePath CONTAINS[c] %@", self.filter.processPattern]];
-    }
+    // Handle stuff like 'sPr*N*d' == SpringBoard
+    NSString *(^wrapInputForFuzzyMatch)(NSString *) = ^NSString *(NSString *input) {
+        NSString *wrapped = [input stringByReplacingOccurrencesOfString:@"*" withString:@"[^/]*"];
+        if (![wrapped hasPrefix:@".*"]) {
+            if ([wrapped hasPrefix:@"*"]) {
+                wrapped = [@"." stringByAppendingString:wrapped];
+            }
+            else {
+                wrapped = [@".*" stringByAppendingString:wrapped];
+            }
+        }
+        if (![wrapped hasSuffix:@".*"]) {
+            if ([wrapped hasSuffix:@"*"]) {
+                wrapped = [wrapped substringToIndex:wrapped.length - 1];
+                wrapped = [wrapped stringByAppendingString:@".*"];
+            }
+            else {
+                wrapped = [wrapped stringByAppendingString:@".*"];
+            }
+        }
+        return wrapped;
+    };
     
+    if (self.filter.processPattern) {
+        [subpredicates addObject:[NSPredicate predicateWithFormat:@"processImagePath MATCHES[c] %@", wrapInputForFuzzyMatch(self.filter.processPattern)]];
+    }
     if (self.filter.pid) {
         [subpredicates addObject:[NSPredicate predicateWithFormat:@"processIdentifier == %d", self.filter.pid]];
     }
     
     if (self.filter.contains) {
-        [subpredicates addObject:[NSPredicate predicateWithFormat:@"composedMessage CONTAINS[c] %@", self.filter.contains]];
+        [subpredicates addObject:[NSPredicate predicateWithFormat:@"composedMessage MATCHES[c] %@", wrapInputForFuzzyMatch(self.filter.contains)]];
     }
     
     if (self.filter.exclude) {
-        [subpredicates addObject:[NSPredicate predicateWithFormat:@"NOT composedMessage CONTAINS[c] %@", self.filter.exclude]];
+        [subpredicates addObject:[NSPredicate predicateWithFormat:@"NOT composedMessage MATCHES[c] %@", wrapInputForFuzzyMatch(self.filter.exclude)]];
         [subpredicates addObject:[NSPredicate predicateWithFormat:@"NOT senderImagePath CONTAINS[c] %@", self.filter.exclude]];
-        [subpredicates addObject:[NSPredicate predicateWithFormat:@"NOT subsystem CONTAINS[c] %@", self.filter.exclude]];
     }
     
     if (self.filter.after) {

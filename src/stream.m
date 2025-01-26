@@ -49,7 +49,6 @@ OSLogEventStream *CreateStoredStream(void) {
     }];
     
     dispatch_semaphore_wait(sem, dispatch_time(DISPATCH_TIME_NOW, 3 * NSEC_PER_SEC));
-    
     if (!stream) {
         printf("Failed to create stored stream\n");
         return nil;
@@ -62,7 +61,7 @@ void ConfigureStream(OSLogEventStream *stream, NSPredicate *pred, OSEventHandler
     [stream setFilterPredicate:pred];
     [stream setEventHandler:handler];
     [stream setInvalidationHandler:^(void) {
-        printf("Stream invalidated\n");
+        printf("End of stream\n");
         exit(0);
     }];
 }
