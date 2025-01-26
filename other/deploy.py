@@ -19,7 +19,7 @@ class BinaryInstallInformation:
 
 
 BINARY_DEPLOY_INFO = {
-    "oslo": BinaryInstallInformation(JB_ROOT_PREFIX / "usr/bin/oslo", Path("other/entitlements.plist")),
+    "oslo_ios": BinaryInstallInformation(JB_ROOT_PREFIX / "usr/bin/oslo", Path("other/entitlements.plist")),
 }
 
 

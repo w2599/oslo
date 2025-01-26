@@ -1,6 +1,6 @@
 # oslo
 
-An `os_log` viewer for iOS that supports streaming both real-time logs and archived logs.
+An `os_log` viewer for iOS and macOS that supports streaming both real-time logs and archived logs.
 
 - Real-time and archived log viewing
 - Unredacts `<private>` values in log messages
@@ -44,34 +44,35 @@ Options:
 #### Usage Examples
 
 ```bash
-# Stream all live logs
-oslo
+# View live SpringBoard logs
+oslo springboard|SpringBoard|spr*N*
 
-# View SpringBoard logs
-oslo springboard
+# View error logs from Notes app in the last 5 minutes
+oslo notes --level error --after=-5m
+# Error logs up to, but not after, 1 hour ago
+oslo notes --level error --before=-1h
+# Last 7d, and include all logs that contain 'error'
+oslo notes --after=-7d --contains "error"
 
-# View stored logs from process ID 1234
-oslo -s 1234
-
-# View error logs from Notes app in the last hour
-oslo notes --level=error --after=-1h
-
-# View stored crash-related logs, grouped by PID
-oslo -s -g --contains=crash
+# Find details about crashes that occurred while logs were not being monitored.
+# Case insensitive, wildcard supported
+oslo springboard --stored --contains "caught exception" --exclude "ReportCrash"
+oslo springboard -s -c "*exception* -e "*crash"
 
 # Export filtered logs to file
 oslo springboard --level=error --file=errors.log
 
-# Get JSON output for automation
+# Get JSON output
 oslo notes --json > notes_logs.json
 ```
 
 ### Requirements
 
+* macOS 11.5 or later
 * Jailbroken iOS 14.0 or later
   * Earlier versions may work. iOS 14.0 - 18.2 tested
   * Rootless or rootful
-* Pre-compiled releases include armv7, armv7s, and arm64 slices
+* Pre-compiled releases for iOS include armv7, armv7s, and arm64 slices
 
 ### Screenshots
 
@@ -81,8 +82,6 @@ oslo notes --json > notes_logs.json
 #### Stored logs grouped by PID
 ![oslo](./other/screenshot-group-termination-logs-by-PID.png)
 
-#### Demo
-[![asciicast](https://asciinema.org/a/tet26ugcwutH0CIwjKeS99C1P.svg?poster=npt:07)](https://asciinema.org/a/tet26ugcwutH0CIwjKeS99C1P?poster=npt:07)
 
 ## Credits
 
