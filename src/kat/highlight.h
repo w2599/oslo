@@ -33,7 +33,7 @@
 #include "hashtable.h"
 
 /* External definitions. */
-extern char *COLORS[];
+extern char *HL_COLORS[];
 extern int LENGTHS[];
 extern unsigned char symbols_table[];
 extern int CURRENT_THEME;
@@ -193,7 +193,7 @@ INLINE static int highlight_symbol(char c, char **hl)
 {
     if (symbols_table[(unsigned char)c])
     {
-        *hl = add_str_to_hl(*hl, COLORS[CURRENT_THEME+SYMBOL_COLOR],
+        *hl = add_str_to_hl(*hl, HL_COLORS[CURRENT_THEME+SYMBOL_COLOR],
                             LENGTHS[CURRENT_THEME+SYMBOL_COLOR]);
         *hl = add_char_to_hl(*hl, c);
         *hl = add_str_to_hl(*hl, RESET_COLOR, 4);

@@ -69,7 +69,7 @@
 int CURRENT_THEME = ELF_DEITY;
 
 /* Color map. */
-char *COLORS[] = {
+char *HL_COLORS[] = {
     /*
      * 8 colors theme.
      */
@@ -390,7 +390,7 @@ char *highlight_line(const char *line, char *hl, size_t str_size)
                          * sure, so we can safely analyze this and abort the loop.
                          */
                         tok_size = str_size - i;
-                        hl = add_str_to_hl(hl, COLORS[CURRENT_THEME+COMMENT_COLOR],
+                        hl = add_str_to_hl(hl, HL_COLORS[CURRENT_THEME+COMMENT_COLOR],
                                            LENGTHS[CURRENT_THEME+COMMENT_COLOR]);
                         hl = add_str_to_hl(hl, line+i, tok_size);
                         hl = add_str_to_hl(hl, RESET_COLOR, 4);
@@ -447,7 +447,7 @@ char *highlight_line(const char *line, char *hl, size_t str_size)
                     /* If keyword, highlight. */
                     if ( (keyword = is_keyword(line+keyword_start, tok_size)) != NULL )
                     {
-                        hl = add_str_to_hl(hl, COLORS[CURRENT_THEME+keyword->color],
+                        hl = add_str_to_hl(hl, HL_COLORS[CURRENT_THEME+keyword->color],
                                            LENGTHS[CURRENT_THEME+keyword->color]);
                         hl = add_str_to_hl(hl, line+keyword_start, tok_size);
                         hl = add_str_to_hl(hl, RESET_COLOR, 4);
@@ -469,7 +469,7 @@ char *highlight_line(const char *line, char *hl, size_t str_size)
                         keyword_end = i;
                         tok_size = keyword_end - keyword_start;
                         gs.state = HL_DEFAULT;
-                        hl = add_str_to_hl(hl, COLORS[CURRENT_THEME+FUNC_CALL_COLOR],
+                        hl = add_str_to_hl(hl, HL_COLORS[CURRENT_THEME+FUNC_CALL_COLOR],
                                            LENGTHS[CURRENT_THEME+FUNC_CALL_COLOR]);
                         hl = add_str_to_hl(hl, line+keyword_start, tok_size);
                         hl = add_str_to_hl(hl, RESET_COLOR, 4);
@@ -522,7 +522,7 @@ char *highlight_line(const char *line, char *hl, size_t str_size)
                     /* If not a valid char keyword: valid number. */
                     if (!is_char_keyword(line[i]))
                     {
-                        hl = add_str_to_hl(hl, COLORS[CURRENT_THEME+NUMBER_COLOR],
+                        hl = add_str_to_hl(hl, HL_COLORS[CURRENT_THEME+NUMBER_COLOR],
                                            LENGTHS[CURRENT_THEME+NUMBER_COLOR]);
                         hl = add_str_to_hl(hl, line+keyword_start, tok_size);
                         hl = add_str_to_hl(hl, RESET_COLOR, 4);
@@ -554,7 +554,7 @@ char *highlight_line(const char *line, char *hl, size_t str_size)
                     tok_size = keyword_end - keyword_start + 1;
                     gs.state = HL_DEFAULT;
                     
-                    hl = add_str_to_hl(hl, COLORS[CURRENT_THEME+STRING_COLOR],
+                    hl = add_str_to_hl(hl, HL_COLORS[CURRENT_THEME+STRING_COLOR],
                                        LENGTHS[CURRENT_THEME+STRING_COLOR]);
                     hl = add_str_to_hl(hl, line+keyword_start, tok_size);
                     hl = add_char_to_hl(hl, line[i]);
@@ -579,7 +579,7 @@ char *highlight_line(const char *line, char *hl, size_t str_size)
                     }
                     
                     tok_size = keyword_end - keyword_start + 1;
-                    hl = add_str_to_hl(hl, COLORS[CURRENT_THEME+STRING_COLOR],
+                    hl = add_str_to_hl(hl, HL_COLORS[CURRENT_THEME+STRING_COLOR],
                                        LENGTHS[CURRENT_THEME+STRING_COLOR]);
                     hl = add_str_to_hl(hl, line+keyword_start, tok_size);
                     hl = add_str_to_hl(hl, RESET_COLOR, 4);
@@ -610,7 +610,7 @@ char *highlight_line(const char *line, char *hl, size_t str_size)
                     }
                     
                     tok_size = keyword_end - keyword_start + 1;
-                    hl = add_str_to_hl(hl, COLORS[CURRENT_THEME+COMMENT_COLOR],
+                    hl = add_str_to_hl(hl, HL_COLORS[CURRENT_THEME+COMMENT_COLOR],
                                        LENGTHS[CURRENT_THEME+COMMENT_COLOR]);
                     hl = add_str_to_hl(hl, line+keyword_start, tok_size);
                     hl = add_str_to_hl(hl, RESET_COLOR, 4);
@@ -653,7 +653,7 @@ char *highlight_line(const char *line, char *hl, size_t str_size)
                     keyword_end = i;
                     tok_size = keyword_end - keyword_start + 1;
                     
-                    hl = add_str_to_hl(hl, COLORS[CURRENT_THEME+PREPROC_COLOR],
+                    hl = add_str_to_hl(hl, HL_COLORS[CURRENT_THEME+PREPROC_COLOR],
                                        LENGTHS[CURRENT_THEME+PREPROC_COLOR]);
                     hl = add_str_to_hl(hl, line+keyword_start, tok_size);
                     hl = add_str_to_hl(hl, RESET_COLOR, 4);
@@ -687,7 +687,7 @@ char *highlight_line(const char *line, char *hl, size_t str_size)
                     if (line[i] == '<' || line[i] == '"' || i == str_size)
                     {
                         tok_size = i - keyword_start;
-                        hl = add_str_to_hl(hl, COLORS[CURRENT_THEME+PREPROC_COLOR],
+                        hl = add_str_to_hl(hl, HL_COLORS[CURRENT_THEME+PREPROC_COLOR],
                                            LENGTHS[CURRENT_THEME+PREPROC_COLOR]);
                         hl = add_str_to_hl(hl, line+keyword_start, tok_size);
                         hl = add_str_to_hl(hl, RESET_COLOR, 4);
@@ -704,7 +704,7 @@ char *highlight_line(const char *line, char *hl, size_t str_size)
                     tok_size = keyword_end - keyword_start + 1;
                     gs.state = HL_DEFAULT;
                     
-                    hl = add_str_to_hl(hl, COLORS[CURRENT_THEME+STRING_COLOR],
+                    hl = add_str_to_hl(hl, HL_COLORS[CURRENT_THEME+STRING_COLOR],
                                        LENGTHS[CURRENT_THEME+STRING_COLOR]);
                     hl = add_str_to_hl(hl, line+keyword_start, tok_size);
                     hl = add_str_to_hl(hl, RESET_COLOR, 4);
@@ -835,7 +835,7 @@ int highlight_init(const char *theme_file)
             sprintf(color, "\033[38;5;%dm", num);
             
             /* Copy to the list. */
-            COLORS[CURRENT_THEME+idx] = color;
+            HL_COLORS[CURRENT_THEME+idx] = color;
             LENGTHS[CURRENT_THEME+idx] = (int)strlen(color);
         }
         
@@ -844,7 +844,7 @@ int highlight_init(const char *theme_file)
         {
             /* Deallocate previously configured pointers. */
             for (int i = 0; i < idx; i++)
-                free(COLORS[CURRENT_THEME+i]);
+                free(HL_COLORS[CURRENT_THEME+i]);
             
             fprintf(stderr, "highlight: wrong theme, maybe a wrong number of colors? (%d/8)\n"
                     "           colors should be exactly 8 and between 0-255!\n", idx);
@@ -880,7 +880,7 @@ void highlight_finish(void)
     if (CURRENT_THEME == USER_DEF)
     {
         for (int i = 0; i < 8; i++)
-            free(COLORS[CURRENT_THEME+i]);
+            free(HL_COLORS[CURRENT_THEME+i]);
         
         CURRENT_THEME = ELF_DEITY;
     }
