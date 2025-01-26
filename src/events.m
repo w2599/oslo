@@ -140,7 +140,7 @@
                 [self writeOutput:@"\n"];
             }
         }
-        else if (self.outputFile) {
+        else if (self.outputFile || opts.noColor) {
             NSString *output = [NSString stringWithFormat:@"%@ %s\n", [eventCopy.date description], [eventCopy.composedMessage UTF8String]];
             [self writeOutput:output];
         }

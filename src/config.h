@@ -30,6 +30,7 @@ typedef NS_ENUM(NSInteger, OSLogLevel) {
 @property (nonatomic, assign) BOOL group;
 @property (nonatomic, assign) BOOL json;
 @property (nonatomic, assign) BOOL dropRepeatedMessages;
+@property (nonatomic, assign) BOOL noColor;
 @property (nonatomic, copy) NSString *outputFile;
 @end
 

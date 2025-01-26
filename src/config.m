@@ -62,8 +62,9 @@
 + (instancetype)parseWithArgc:(int)argc argv:(char **)argv {
     OSLogConfig *config = [[OSLogConfig alloc] init];
     config.filter = [[OSLogFilter alloc] init];
-    config.filter.level = OSLogLevelNotice;
     config.options = [[OSLogOptions alloc] init];
+    config.filter.level = OSLogLevelNotice;
+    config.options.noColor = NO;
     
     static struct option long_options[] = {
         {"level", required_argument, 0, 'L'},
@@ -77,6 +78,7 @@
         {"json", no_argument, 0, 'j'},
         {"file", required_argument, 0, 'f'},
         {"repeats", no_argument, 0, 'r'},
+        {"no-color", no_argument, 0, 'N'},
         {"help", no_argument, 0, 'h'},
         {0, 0, 0, 0}
     };
@@ -84,7 +86,7 @@
     int opt;
     int option_index = 0;
     
-    while ((opt = getopt_long(argc, argv, "L:a:b:c:e:lsgjrf:h", long_options, &option_index)) != -1) {
+    while ((opt = getopt_long(argc, argv, "L:a:b:c:e:lsgjrNf:h", long_options, &option_index)) != -1) {
         switch (opt) {
             case 'L': {
                 NSString *level = [NSString stringWithUTF8String:optarg];
@@ -147,11 +149,14 @@
             case 'j':
                 config.options.json = YES;
                 break;
-            case 'f':
-                config.options.outputFile = [NSString stringWithUTF8String:optarg];
-                break;
             case 'r':
                 config.options.dropRepeatedMessages = YES;
+                break;
+            case 'N':
+                config.options.noColor = YES;
+                break;
+            case 'f':
+                config.options.outputFile = [NSString stringWithUTF8String:optarg];
                 break;
             case 'h':
                 [self printUsage];
@@ -212,6 +217,7 @@
     printf("  -j, --json     JSON output\n");
     printf("  -f, --file     Write to file\n");
     printf("  -r, --repeats  Drop repeated messages (default: show all)\n");
+    printf("  -N, --no-color  Disable color output\n");
 }
 
 - (NSPredicate *)buildPredicate {

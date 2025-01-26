@@ -38,6 +38,7 @@ Options:
   -j, --json     JSON output
   -f, --file     Write to file
   -r, --repeats  Drop repeated messages (default: show all)
+  -N, --no-color  Disable color output
 ```
 
 #### Usage Examples
