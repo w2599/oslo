@@ -106,7 +106,7 @@
                     config.filter.level = OSLogLevelFault;
                 }
                 else {
-                    printf("Invalid log level: %s\n", level.UTF8String);
+                    printf("Invalid log level: %s\nValid levels: notice, info, debug, error, fault\n", level.UTF8String);
                     exit(1);
                 }
                 break;

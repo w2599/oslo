@@ -12,34 +12,32 @@ An `os_log` viewer for iOS and macOS that supports streaming both real-time logs
 
 ### Usage
 
-```
 oslo [process] [filters] [options]
 
-Process:
-  <name>         Process name (case insensitive substring match))
-  <pid>          Process ID
-                 (shows all processes if omitted)
+#### **Process Selection:**
+- `<name>` — Process name (case insensitive substring match)
+- `<pid>` — Process ID  
+  _(Shows all processes if omitted)_
 
-Filters:
-  -L, --level    Log level (debug|info|warn|error)
-  -a, --after    Time format options:
-                   Offset: -1h, -30m, -1d, -1w
-                   Date: 2025-01-23
-                   Time: 12:34:56
-                   Both: 2025-01-23 12:34:56
-  -b, --before   Same time formats as --after
-  -c, --contains Include messages containing text (case insensitive)
-  -e, --exclude  Exclude messages containing text (case insensitive)
+#### **Filters:**
 
-Options:
-  -l, --live     Live logs (default)
-  -s, --stored   Stored logs
-  -g, --group    Group by process
-  -j, --json     JSON output
-  -f, --file     Write to file
-  -r, --repeats  Drop repeated messages (default: show all)
-  -N, --no-color  Disable color output
-```
+- `-L, --level <level>` — Log level (`notice`, `debug`, `info`, `error`, `fault`)
+- `-a, --after <time>` — Show logs after given time  
+  _(Formats: `-1h`, `-30m`, `-1d`, `-1w`, `HH:mm:ss`, `YYYY-MM-DD`, `YYYY-MM-DD HH:mm:ss`)_
+- `-b, --before <time>` — Show logs before given time _(same formats as `--after`)_
+- `-c, --contains <text>` — Only include messages containing text _(case-insensitive)_
+- `-e, --exclude <text>` — Exclude messages containing text _(case-insensitive)_
+
+#### **Options:**
+- `-l, --live` — Live logs _(default)_
+- `-s, --stored` — Stored logs
+- `-g, --group` — Group by process _(only for stored logs)_
+- `-j, --json` — JSON output _(not available in live mode)_
+- `-f, --file <path>` — Write output to a file
+- `-r, --repeats` — Don't drop repeated messages _(default: drop repeats)_
+- `-N, --no-color` — Disable color output
+- `-h, --help` — Show usage information
+
 
 #### Usage Examples
 
@@ -57,13 +55,19 @@ oslo notes --after=-7d --contains "error"
 # Find details about crashes that occurred while logs were not being monitored.
 # Case insensitive, wildcard supported
 oslo springboard --stored --contains "caught exception" --exclude "ReportCrash"
-oslo springboard -s -c "*exception* -e "*crash"
+oslo springboard -s -c "*Exception" -e "simulated_crash"
 
 # Export filtered logs to file
 oslo springboard --level=error --file=errors.log
 
-# Get JSON output
-oslo notes --json > notes_logs.json
+# View all stored logs from the last 24 hours and export to JSON
+oslo --stored --after=-1d --json > logs.json
+
+# Show all logs containing "network error" but exclude those with "timeout"
+oslo --contains "network error" --exclude "timeout"
+
+# Follow live logs from a PID and write to a file
+oslo 12345 --file=logs.txt
 ```
 
 ### Requirements
