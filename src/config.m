@@ -65,6 +65,9 @@
     config.options = [[OSLogOptions alloc] init];
     config.filter.level = OSLogLevelNotice;
     config.options.noColor = NO;
+
+    config.filter.containsPatterns = [[NSMutableArray alloc] init];
+    config.filter.excludePatterns = [[NSMutableArray alloc] init];
     
     static struct option long_options[] = {
         {"level", required_argument, 0, 'L'},
@@ -86,7 +89,7 @@
     int opt;
     int option_index = 0;
     
-    while ((opt = getopt_long(argc, argv, "L:a:b:c:e:lsgjrNf:h", long_options, &option_index)) != -1) {
+    while ((opt = getopt_long(argc, argv, "L:a:b:c:e:lsgjrNf:i:h", long_options, &option_index)) != -1) {
         switch (opt) {
             case 'L': {
                 NSString *level = [NSString stringWithUTF8String:optarg];
@@ -132,10 +135,13 @@
                 break;
             }
             case 'c':
-                config.filter.contains = [NSString stringWithUTF8String:optarg];
+                [(NSMutableArray *)config.filter.containsPatterns addObject:[NSString stringWithUTF8String:optarg]];
                 break;
             case 'e':
-                config.filter.exclude = [NSString stringWithUTF8String:optarg];
+                [(NSMutableArray *)config.filter.excludePatterns addObject:[NSString stringWithUTF8String:optarg]];
+                break;
+            case 'i':
+                config.filter.imagePath = [NSString stringWithUTF8String:optarg];
                 break;
             case 'l':
                 config.options.live = YES;
@@ -209,7 +215,8 @@
     printf("                   Both: 2025-01-23 12:34:56\n");
     printf("  -b, --before   Same time formats as --after\n");
     printf("  -c, --contains Include messages containing text (case insensitive)\n");
-    printf("  -e, --exclude  Exclude messages containing text (case insensitive)\n\n");
+    printf("  -e, --exclude  Exclude messages containing text (case insensitive)\n");
+    printf("  -i, --image    Filter by process or image path\n\n");
     printf("Options:\n");
     printf("  -l, --live     Live logs (default)\n");
     printf("  -s, --stored   Stored logs\n");
@@ -249,19 +256,24 @@
     if (self.filter.processPattern) {
         [subpredicates addObject:[NSPredicate predicateWithFormat:@"processImagePath MATCHES[c] %@", wrapInputForFuzzyMatch(self.filter.processPattern)]];
     }
+    
     if (self.filter.pid) {
         [subpredicates addObject:[NSPredicate predicateWithFormat:@"processIdentifier == %d", self.filter.pid]];
     }
-    
-    if (self.filter.contains) {
-        [subpredicates addObject:[NSPredicate predicateWithFormat:@"composedMessage MATCHES[c] %@", wrapInputForFuzzyMatch(self.filter.contains)]];
+
+    for (NSString *pattern in self.filter.containsPatterns) {
+        [subpredicates addObject:[NSPredicate predicateWithFormat:@"composedMessage MATCHES[c] %@", wrapInputForFuzzyMatch(pattern)]];
     }
     
-    if (self.filter.exclude) {
-        [subpredicates addObject:[NSPredicate predicateWithFormat:@"NOT composedMessage MATCHES[c] %@", wrapInputForFuzzyMatch(self.filter.exclude)]];
-        [subpredicates addObject:[NSPredicate predicateWithFormat:@"NOT senderImagePath CONTAINS[c] %@", self.filter.exclude]];
+    for (NSString *pattern in self.filter.excludePatterns) {
+        [subpredicates addObject:[NSPredicate predicateWithFormat:@"NOT (composedMessage MATCHES[c] %@ OR senderImagePath MATCHES[c] %@)",
+            wrapInputForFuzzyMatch(pattern), wrapInputForFuzzyMatch(pattern)]];
     }
-    
+
+    if (self.filter.imagePath) {
+        [subpredicates addObject:[NSPredicate predicateWithFormat:@"senderImagePath MATCHES[c] %@", wrapInputForFuzzyMatch(self.filter.imagePath)]];
+    }
+
     if (self.filter.after) {
         [subpredicates addObject:[NSPredicate predicateWithFormat:@"date >= %@", self.filter.after]];
     }

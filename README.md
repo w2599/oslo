@@ -27,6 +27,8 @@ oslo [process] [filters] [options]
 - `-b, --before <time>` — Show logs before given time _(same formats as `--after`)_
 - `-c, --contains <text>` — Only include messages containing text _(case-insensitive)_
 - `-e, --exclude <text>` — Exclude messages containing text _(case-insensitive)_
+  _(--contains/--exclude can be used multiple times for AND matching)_
+- `-i --image <text>` — Filter logs by sender image/library path
 
 #### **Options:**
 - `-l, --live` — Live logs _(default)_
@@ -34,7 +36,7 @@ oslo [process] [filters] [options]
 - `-g, --group` — Group by process _(only for stored logs)_
 - `-j, --json` — JSON output _(not available in live mode)_
 - `-f, --file <path>` — Write output to a file
-- `-r, --repeats` — Don't drop repeated messages _(default: drop repeats)_
+- `-r, --repeats` - Drop repeated messages _(default: show all repeats)_
 - `-N, --no-color` — Disable color output
 - `-h, --help` — Show usage information
 
@@ -51,6 +53,16 @@ oslo notes --level error --after=-5m
 oslo notes --level error --before=-1h
 # Last 7d, and include all logs that contain 'error'
 oslo notes --after=-7d --contains "error"
+
+# Chain multiple contains/exclude filters (AND matching)
+oslo --contains "network" --contains "error" # Logs containing both terms
+oslo --exclude "timeout" --exclude "retry"   # Exclude logs with either term
+oslo --contains "error" --contains "connection" --exclude "timeout" --exclude "retry"
+
+# Filter by specific frameworks or libraries
+oslo --image "NetworkExtension"  # Logs from NetworkExtension framework
+oslo --image "/System/Library/Frameworks/Foundation.framework"
+oslo --image "UIKit" --contains "error"  # Combine with other filters
 
 # Find details about crashes that occurred while logs were not being monitored.
 # Case insensitive, wildcard supported

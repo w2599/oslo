@@ -21,8 +21,10 @@ typedef NS_ENUM(NSInteger, OSLogLevel) {
 @property (nonatomic, assign) OSLogLevel level;
 @property (nonatomic, strong) NSDate *after;
 @property (nonatomic, strong) NSDate *before;
-@property (nonatomic, copy) NSString *contains;
-@property (nonatomic, copy) NSString *exclude;
+@property (nonatomic, strong) NSArray<NSString *> *containsPatterns;
+@property (nonatomic, strong) NSArray<NSString *> *excludePatterns;
+@property (nonatomic, strong) NSString *imagePath;
+
 @end
 
 @interface OSLogOptions : NSObject
