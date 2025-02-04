@@ -8,6 +8,8 @@
 #ifndef LoggingSupport_h
 #define LoggingSupport_h
 
+#import "config.h"
+
 @class OSLogEventProxy;
 
 @interface OSLogEventSource : NSObject
@@ -79,6 +81,7 @@ typedef NS_OPTIONS(NSUInteger, OSLogStreamFlags) {
 
 // Wrapper for OSLogEventProxy, because the type cannot be safely retained
 @interface _OSLogEventCopy : NSObject
+
 @property NSString *processImagePath;
 @property NSString *senderImagePath;
 @property NSString *composedMessage;
@@ -86,7 +89,12 @@ typedef NS_OPTIONS(NSUInteger, OSLogStreamFlags) {
 @property int logType;
 @property int processIdentifier;
 @property BOOL isError;
+
+// Attach a copy of the log options (which may influence output formatting), captured at the time of the event
+@property (nonatomic, retain) OSloLogOptions *osloLogOptions;
+
 - (id)initWithProxyEvent:(OSLogEventProxy *)event;
+
 @end
 
 #endif /* LoggingSupport_h */

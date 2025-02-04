@@ -84,7 +84,7 @@
     }
 }
 
-- (OSEventHandler)handlerWithOptions:(OSLogOptions *)opts {
+- (OSEventHandler)handlerWithOptions:(OSloLogOptions *)opts {
     if (opts.outputFile) {
         if (![[NSFileManager defaultManager] createFileAtPath:opts.outputFile contents:nil attributes:nil]) {
             printf("Failed to create output file: %s\n", [opts.outputFile UTF8String]);
@@ -131,6 +131,7 @@
         }
         
         _OSLogEventCopy *eventCopy = [[_OSLogEventCopy alloc] initWithProxyEvent:event];
+        eventCopy.osloLogOptions = opts;
 
         if (self->_jsonOutput) {
             NSError *error = nil;

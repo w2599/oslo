@@ -14,6 +14,6 @@ typedef void (^OSEventHandler)(OSLogEventProxy *);
 @property (nonatomic, strong) OSLogEventStream *currentStream;
 
 + (id)sharedProcessor;
-- (OSEventHandler)handlerWithOptions:(OSLogOptions *)opts;
+- (OSEventHandler)handlerWithOptions:(OSloLogOptions *)opts;
 
 @end

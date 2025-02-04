@@ -5,13 +5,13 @@
 //  Created by Ethan Arbuckle on 1/23/25.
 //
 
-#import "config.h"
 #import <getopt.h>
+#import "config.h"
 
-@implementation OSLogFilter
+@implementation OSloLogFilter
 @end
 
-@implementation OSLogOptions
+@implementation OSloLogOptions
 - (id)init {
     if ((self = [super init])) {
         _live = YES;
@@ -61,8 +61,8 @@
 
 + (instancetype)parseWithArgc:(int)argc argv:(char **)argv {
     OSLogConfig *config = [[OSLogConfig alloc] init];
-    config.filter = [[OSLogFilter alloc] init];
-    config.options = [[OSLogOptions alloc] init];
+    config.filter = [[OSloLogFilter alloc] init];
+    config.options = [[OSloLogOptions alloc] init];
     config.filter.level = OSLogLevelNotice;
     config.options.noColor = NO;
 
@@ -82,6 +82,8 @@
         {"file", required_argument, 0, 'f'},
         {"repeats", no_argument, 0, 'r'},
         {"no-color", no_argument, 0, 'N'},
+        {"strip", no_argument, 0, 'S'},
+        {"image", required_argument, 0, 'i'},
         {"help", no_argument, 0, 'h'},
         {0, 0, 0, 0}
     };
@@ -89,7 +91,7 @@
     int opt;
     int option_index = 0;
     
-    while ((opt = getopt_long(argc, argv, "L:a:b:c:e:lsgjrNf:i:h", long_options, &option_index)) != -1) {
+    while ((opt = getopt_long(argc, argv, "L:a:b:c:e:lsgjrNSf:i:h", long_options, &option_index)) != -1) {
         switch (opt) {
             case 'L': {
                 NSString *level = [NSString stringWithUTF8String:optarg];
@@ -164,6 +166,8 @@
             case 'f':
                 config.options.outputFile = [NSString stringWithUTF8String:optarg];
                 break;
+            case 'S':
+                config.options.stripNewlines = YES;
             case 'h':
                 [self printUsage];
                 exit(0);
@@ -224,7 +228,9 @@
     printf("  -j, --json     JSON output\n");
     printf("  -f, --file     Write to file\n");
     printf("  -r, --repeats  Drop repeated messages (default: show all)\n");
-    printf("  -N, --no-color  Disable color output\n");
+    printf("  -N, --no-color Disable color output\n");
+    printf("  -S, --strip    Strip newlines from output\n");
+    printf("  -h, --help     Show this help message\n");
 }
 
 - (NSPredicate *)buildPredicate {

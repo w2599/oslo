@@ -183,7 +183,9 @@ void printLogEvent(_OSLogEventCopy *logProxyEvent) {
         return;
     }
     
-    removeNewlines((char *)message_copy);
+    if (logProxyEvent.osloLogOptions.stripNewlines) {
+        removeNewlines((char *)message_copy);
+    }
     
     if (logProxyEvent.isError) {
         [termDumper setFgColor:1];

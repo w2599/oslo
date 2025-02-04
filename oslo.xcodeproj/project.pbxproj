@@ -40,6 +40,7 @@
 		5F03D5A72D2B68D1005BF9ED /* output.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = output.m; sourceTree = "<group>"; };
 		5F03D5A92D2B68ED005BF9ED /* output.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = output.h; sourceTree = "<group>"; };
 		5F3715F82D09AAED003DF348 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		5F644B6B2D51F2F500596EBD /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = SOURCE_ROOT; };
 		5F7788852D4335A200DC18F6 /* config.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = config.m; sourceTree = "<group>"; };
 		5F7788872D4335A600DC18F6 /* config.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = config.h; sourceTree = "<group>"; };
 		5F7788892D43364300DC18F6 /* events.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = events.m; sourceTree = "<group>"; };
@@ -107,6 +108,7 @@
 		5F92AB962D2F010400316521 /* other */ = {
 			isa = PBXGroup;
 			children = (
+				5F644B6B2D51F2F500596EBD /* README.md */,
 				5F92AB942D2F010400316521 /* deploy.py */,
 				5F92AB952D2F010400316521 /* entitlements.plist */,
 				5F92AB972D2F036D00316521 /* screenshot-allprocs-live.png */,

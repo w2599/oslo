@@ -38,6 +38,7 @@ oslo [process] [filters] [options]
 - `-f, --file <path>` — Write output to a file
 - `-r, --repeats` - Drop repeated messages _(default: show all repeats)_
 - `-N, --no-color` — Disable color output
+- `-S, --strip` - Strip newlines from output
 - `-h, --help` — Show usage information
 
 

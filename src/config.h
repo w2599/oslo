@@ -15,7 +15,7 @@ typedef NS_ENUM(NSInteger, OSLogLevel) {
     OSLogLevelFault = 0x11
 };
 
-@interface OSLogFilter : NSObject
+@interface OSloLogFilter : NSObject
 @property (nonatomic, copy) NSString *processPattern;
 @property (nonatomic, assign) pid_t pid;
 @property (nonatomic, assign) OSLogLevel level;
@@ -27,18 +27,19 @@ typedef NS_ENUM(NSInteger, OSLogLevel) {
 
 @end
 
-@interface OSLogOptions : NSObject
+@interface OSloLogOptions : NSObject
 @property (nonatomic, assign) BOOL live;
 @property (nonatomic, assign) BOOL group;
 @property (nonatomic, assign) BOOL json;
 @property (nonatomic, assign) BOOL dropRepeatedMessages;
+@property (nonatomic, assign) BOOL stripNewlines;
 @property (nonatomic, assign) BOOL noColor;
 @property (nonatomic, copy) NSString *outputFile;
 @end
 
 @interface OSLogConfig : NSObject
-@property (nonatomic, strong) OSLogFilter *filter;
-@property (nonatomic, strong) OSLogOptions *options;
+@property (nonatomic, strong) OSloLogFilter *filter;
+@property (nonatomic, strong) OSloLogOptions *options;
 
 + (instancetype)parseWithArgc:(int)argc argv:(char **)argv;
 - (NSPredicate *)buildPredicate;
