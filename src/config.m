@@ -74,6 +74,7 @@
         {"after", required_argument, 0, 'a'},
         {"before", required_argument, 0, 'b'},
         {"contains", required_argument, 0, 'c'},
+        {"zqbb", no_argument, 0, 'z'},
         {"exclude", required_argument, 0, 'e'},
         {"live", no_argument, 0, 'l'},
         {"stored", no_argument, 0, 's'},
@@ -91,7 +92,7 @@
     int opt;
     int option_index = 0;
     
-    while ((opt = getopt_long(argc, argv, "L:a:b:c:e:lsgjrNSf:i:h", long_options, &option_index)) != -1) {
+    while ((opt = getopt_long(argc, argv, "L:a:b:c:e:zlsgjrNSf:i:h", long_options, &option_index)) != -1) {
         switch (opt) {
             case 'L': {
                 NSString *level = [NSString stringWithUTF8String:optarg];
@@ -139,6 +140,9 @@
             case 'c':
                 [(NSMutableArray *)config.filter.containsPatterns addObject:[NSString stringWithUTF8String:optarg]];
                 break;
+            case 'z':
+                [(NSMutableArray *)config.filter.containsPatterns addObject:[NSString stringWithUTF8String:"\\[----]"]];
+                break;
             case 'e':
                 [(NSMutableArray *)config.filter.excludePatterns addObject:[NSString stringWithUTF8String:optarg]];
                 break;
@@ -176,7 +180,7 @@
                 exit(1);
         }
     }
-    
+
     if ((config.filter.after && config.filter.before) && ([config.filter.after compare:config.filter.before] == NSOrderedDescending)) {
         printf("Error: --after time is later than --before time\n");
         exit(1);
@@ -219,6 +223,7 @@
     printf("                   Both: 2025-01-23 12:34:56\n");
     printf("  -b, --before   Same time formats as --after\n");
     printf("  -c, --contains Include messages containing text (case insensitive)\n");
+    printf("  -z, --zqbb     Include messages [----]\n");
     printf("  -e, --exclude  Exclude messages containing text (case insensitive)\n");
     printf("  -i, --image    Filter by process or image path\n\n");
     printf("Options:\n");
